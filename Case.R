@@ -59,11 +59,11 @@ lines(newton$x_hist, col = 'green', type = 'l')
 
 #Funkcja do losowania
 Random_numbers=function(count,min_v,max_v){
-  mat=c()
+  Point=c()
   for(i in 1:count){
-    mat=rbind(mat,runif(2,min_v,max_v))
+    Point=rbind(Point,runif(2,min_v,max_v))
   }
-  return(mat)
+  return(Point)
 }
 
 set.seed(123)
@@ -72,11 +72,10 @@ Clients=Random_numbers(8,-1,1)
 Shops=Random_numbers(3,-1,1)
 
 
-plot(Clients)
-points(Shops,col='red')
+plot(Clients,col='yellow',cex =2,pch=19,xlim = c(-1,1),ylim = c(-1,1))
+points(Shops,col='orange',cex =2,pch=19)
 
-
-distances=function(Clients,Shops){
+Exp_Val=function(Clients,Shops){
   distance=c()
   for(i in 1:nrow(Shops)){
     distance=rbind(distance,sqrt(rowSums((Clients-Shops[i,])^2)))
@@ -84,18 +83,18 @@ distances=function(Clients,Shops){
   rownames(distance)=seq(1,nrow(Shops))
   colnames(distance)=seq(1,nrow(Clients))
 
-  distance=exp(t(1/distance))/rowSums(exp(t(1/distance)))
-  return(colSums(distance)) 
+  Exp_Val=exp(t(1/distance))/rowSums(exp(t(1/distance)))
+  return(colSums(Exp_Val)) 
 }
 
 
-distances(Clients ,Shops)
+Exp_Val(Clients ,Shops)
 
 
 
 maximise=function(our_position){
   new_shops=rbind(Shops,our_position)
-  result=distances(Clients,new_shops)
+  result=Exp_Val(Clients,new_shops)
   result=tail(result,1)
   return(-result)
 }
