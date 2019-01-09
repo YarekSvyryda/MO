@@ -24,7 +24,7 @@ mse=function(weights){
 
 
 gd=gradientDescent(f =mse,x = c(0,0),a = 10^-2,e =  10^-10,maxIter = 1000  )
-sd=steepestDescent(f =mse,x = c(0,0),a = 10^-1,e =  10^-10,maxIter = 1000  )
+sd=steepestDescent(f =mse,x = c(0,0),a = 10^-2,e =  10^-10,maxIter = 1000  )
 newton=newton_nD(f =mse,x = c(0,0),tol=  10^-10,h=10^-6 )
 
 plot(gd$f_hist,type='l',col='blue')
@@ -35,7 +35,7 @@ RD_spend=seq(min(data$R.D.Spend),max(data$R.D.Spend),0.1)
 plot(data$R.D.Spend,data$Profit)
 lines(RD_spend,predict(gd$x_opt,data=RD_spend),col='blue')
 lines(RD_spend,predict(sd$x_opt,data=RD_spend),col='red')
-
+lines(RD_spend,predict(newton$x_opt,data=RD_spend),col='green')
 
 n_grid=100
 x_seq <- seq(0, 1, length = n_grid)
@@ -140,3 +140,9 @@ text(t(newton$x_opt),'N',col='green',cex =2,pch=19)
 points(t(our_position),col='BLACK',cex =2,pch=19)
 lines(gd$x_hist,col='blue',cex=5)
 lines(sd$x_hist,col='red')
+
+
+plot_ly(x=~x_seq,y=~x_seq,z=~matrVal,type='contour')%>%add_trace(x=~gd$x_hist[,2],y=~gd$x_hist[,1],type="scatter", mode = 'lines' ,name='GD')%>%add_trace(x=~sd$x_hist[,2],y=~sd$x_hist[,1], mode = 'lines',name='SD')
+
+
+plot_ly(x=~x_seq,y=~x_seq,z=~matrVal)%>%add_surface()%>%add_trace(x=~gd$x_hist[,2],y=~gd$x_hist[,1],z=~gd$f_hist,type="scatter3d", mode = 'lines' ,name='GD',width = 4)%>%add_trace(x=~sd$x_hist[,2],y=~sd$x_hist[,1],z=~sd$f_hist,type="scatter3d", mode = 'lines',name='SD')
