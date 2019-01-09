@@ -1,13 +1,23 @@
 source('numGradient.R')
 source('gradientDescent.R')
-source('numGradient.R')
 source('steepestDescent.R')
 source('Newton.R')
 
 #Regression
 data=read.csv('50_Startups.csv')
+
+data$Profit
+data[,1]
+data[,c(1,3)]
+data[,c("R.D.Spend","Profit")]
+cor(data[,c("R.D.Spend","Profit")])
+
 data=data[,c('R.D.Spend','Profit')]
+
+
+
 data=(data-colMeans(data))/apply(data,2,sd)
+plot(data)
 
 predict=function(weights,data){
   result=weights[1]+data*weights[2]
@@ -45,11 +55,10 @@ for(iRow in 1 : n_grid){
     matrVal[iRow, iCol] <- mse(c(x_seq[iRow], x_seq[iCol]))    
   }
 }
+
 contour(x_seq, x_seq, matrVal, nlevels = 200)
 lines(gd$x_hist, col = 'blue', type = 'l')
-
 lines(sd$x_hist, col = 'red', type = 'l')
-
 lines(newton$x_hist, col = 'green', type = 'l')
 
 
@@ -68,6 +77,7 @@ Random_numbers=function(count,min_v,max_v){
 
 set.seed(123)
 
+
 Clients=Random_numbers(8,-1,1)
 Shops=Random_numbers(3,-1,1)
 
@@ -82,8 +92,10 @@ Exp_Val=function(Clients,Shops){
   }
   rownames(distance)=seq(1,nrow(Shops))
   colnames(distance)=seq(1,nrow(Clients))
-
-  Exp_Val=exp(t(1/distance))/rowSums(exp(t(1/distance)))
+  prob=1/distance
+  exp_prob=exp(prob)
+  
+  Exp_Val=exp_prob/rowSums(exp_prob)
   return(colSums(Exp_Val)) 
 }
 
@@ -114,16 +126,15 @@ for(iRow in 1 : n_grid){
 library(lattice)
 wireframe(-matrVal,drape=T, col.regions=rainbow(100))
 library(plotly)
-plot_ly(z = ~matrVal) %>% add_surface()
+plot_ly(x=~x_seq,y=~x_seq,z = ~-matrVal) %>% add_surface()
 
 
 
 our_position=c(-1,-1)
 
-
+#t - transpose
 gd=gradientDescent(f =maximise,x = our_position,a = 10^-2,e =  10^-4,maxIter = 10000  )
 sd=steepestDescent(f =maximise,x = our_position,a = 10^-1,e =  10^-4,maxIter = 5000  )
-newton=newton_nD(f =maximise,x =our_position,tol=  10^-4,h=10^-5 )
 
 
 
@@ -135,13 +146,14 @@ points(Clients,col='yellow',cex =2,pch=19)
 points(Shops,col='orange',cex =2,pch=19)
 text(t(gd$x_opt),'GD',col='blue',cex =2,pch=19)
 text(t(sd$x_opt),'SD',col='red',cex =2,pch=19)
-text(t(newton$x_opt),'N',col='green',cex =2,pch=19)
 points(t(our_position),col='BLACK',cex =2,pch=19)
 lines(gd$x_hist,col='blue',cex=5)
 lines(sd$x_hist,col='red')
 
+gd$f_opt
+sd$f_opt
 
-plot_ly(x=~x_seq,y=~x_seq,z=~matrVal,type='contour')%>%add_trace(x=~gd$x_hist[,2],y=~gd$x_hist[,1],type="scatter", mode = 'lines' ,name='GD')%>%add_trace(x=~sd$x_hist[,2],y=~sd$x_hist[,1], mode = 'lines',name='SD')
+plot_ly(x=~x_seq,y=~x_seq,z=~matrVal,type='contour')%>%add_trace(x=~gd$x_hist[,2],y=~gd$x_hist[,1],type="scatter", mode = 'lines' ,name='GD')%>%add_trace(x=~sd$x_hist[,2],y=~sd$x_hist[,1],type="scatter", mode = 'lines',name='SD')
 
 
 plot_ly(x=~x_seq,y=~x_seq,z=~matrVal)%>%add_surface()%>%add_trace(x=~gd$x_hist[,2],y=~gd$x_hist[,1],z=~gd$f_hist,type="scatter3d", mode = 'lines' ,name='GD',width = 4)%>%add_trace(x=~sd$x_hist[,2],y=~sd$x_hist[,1],z=~sd$f_hist,type="scatter3d", mode = 'lines',name='SD')
