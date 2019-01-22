@@ -3,6 +3,8 @@ source('gradientDescent.R')
 source('steepestDescent.R')
 source('Newton.R')
 
+
+
 #Regression
 data=read.csv('50_Startups.csv')
 
@@ -75,7 +77,8 @@ Random_numbers=function(count,min_v,max_v){
   return(Point)
 }
 
-set.seed(123)
+set.seed(177)
+
 
 
 Clients=Random_numbers(8,-1,1)
@@ -88,19 +91,25 @@ points(Shops,col='orange',cex =2,pch=19)
 Exp_Val=function(Clients,Shops){
   distance=c()
   for(i in 1:nrow(Shops)){
-    distance=rbind(distance,sqrt(rowSums((Clients-Shops[i,])^2)))
+    distance=rbind(distance, (sqrt((Clients[,1]-Shops[i,1])^2 + (Clients[,2]-Shops[i,2])^2 ))  )
   }
   rownames(distance)=seq(1,nrow(Shops))
   colnames(distance)=seq(1,nrow(Clients))
   prob=1/distance
   exp_prob=exp(prob)
+  Exp_Val_v=c()
+  for (i in 1:nrow(exp_prob)){
+    Exp_Val_v=rbind(Exp_Val_v, exp_prob[i,]/colSums(exp_prob))
+    
+  }
   
-  Exp_Val=exp_prob/rowSums(exp_prob)
-  return(colSums(Exp_Val)) 
+  Exp_Val_v=t(Exp_Val_v)
+  result=colSums(Exp_Val_v)
+  return(result) 
 }
 
 
-Exp_Val(Clients ,Shops)
+Exp_Val(Clients ,rbind(Shops,c(1,1)))
 
 
 
@@ -110,6 +119,7 @@ maximise=function(our_position){
   result=tail(result,1)
   return(-result)
 }
+maximise(c(1,1))
 
 
 
@@ -130,7 +140,7 @@ plot_ly(x=~x_seq,y=~x_seq,z = ~-matrVal) %>% add_surface()
 
 
 
-our_position=c(-1,-1)
+our_position=c(0,0)
 
 #t - transpose
 gd=gradientDescent(f =maximise,x = our_position,a = 10^-2,e =  10^-4,maxIter = 10000  )
@@ -141,7 +151,7 @@ sd=steepestDescent(f =maximise,x = our_position,a = 10^-1,e =  10^-4,maxIter = 5
 
 
 
-contour(x_seq, x_seq, matrVal, nlevels =50)
+contour(x_seq, x_seq, matrVal, nlevels =20)
 points(Clients,col='yellow',cex =2,pch=19)
 points(Shops,col='orange',cex =2,pch=19)
 text(t(gd$x_opt),'GD',col='blue',cex =2,pch=19)
